@@ -35,7 +35,7 @@ output_data = {
     "number_of_collections": number_of_collections,
     "total_size_MB": total_size_mb
 }
-
+print(output_data)
 with open(output_file, 'w') as f:
     json.dump(output_data, f, indent=4)
 
