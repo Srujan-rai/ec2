@@ -13,9 +13,9 @@ password = urllib.parse.quote_plus(password)
 client = pymongo.MongoClient(f"mongodb://raisrujan:4SF21CI047@demo1.cluster-c7yrno5pngaa.ap-south-1.docdb.amazonaws.com:27017/?tls=true&tlsCAFile=global-bundle.pem&replicaSet=rs0&readPreference=secondaryPreferred&retryWrites=false")
 
 
-db = client.get_database()
+db = client.get_database('demo1')
 
-collections = db.list_collection_names('demo1')
+collections = db.list_collection_names()
 number_of_collections = len(collections)
 
 db_stats = db.command("dbstats")
