@@ -15,7 +15,7 @@ client = pymongo.MongoClient(f"mongodb://raisrujan:4SF21CI047@demo1.cluster-c7yr
 
 db = client.get_database()
 
-collections = db.list_collection_names()
+collections = db.list_collection_names('demo1')
 number_of_collections = len(collections)
 
 db_stats = db.command("dbstats")
