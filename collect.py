@@ -1,6 +1,7 @@
 import pymongo
 import json
 from datetime import datetime
+import urllib.parse
 
 output_file = f"docdb_collection_info_{datetime.now().strftime('%Y%m%d')}.json"
 
