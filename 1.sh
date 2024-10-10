@@ -20,20 +20,14 @@ output_file = f"docdb_collection_info_{datetime.now().strftime('%Y%m%d')}.json"
 CA_FILE_PATH = "global-bundle.pem"
 username = "raisrujan"
 password = "4SF21CI047"
-ENDPOINT="demo2.cluster-c7yrno5pngaa.ap-south-1.docdb.amazonaws.com"
-PORT=27017
-USERNAME="raisrujan"
-PASSWORD="4SF21CI047"
-DB_NAME="demo2"
-CA_FILE_PATH="global-bundle.pem"
 username = urllib.parse.quote_plus(username)
 password = urllib.parse.quote_plus(password)
 
 # MongoDB client connection string
-client = pymongo.MongoClient(f"mongodb://raisrujan:8861203688@demo2.cluster-c7yrno5pngaa.ap-south-1.docdb.amazonaws.com:27017/?tls=true&tlsCAFile=global-bundle.pem&replicaSet=rs0&readPreference=secondaryPreferred&retryWrites=false")
+client = pymongo.MongoClient(f"mongodb://{username}:{password}@demo2.cluster-c7yrno5pngaa.ap-south-1.docdb.amazonaws.com:27017/?tls=true&tlsCAFile={CA_FILE_PATH}&replicaSet=rs0&readPreference=secondaryPreferred&retryWrites=false")
 
 # Connect to the database
-db = client.get_database(DB_NAME)
+db = client.get_database('demo1')
 
 # Get collection information
 collections = db.list_collection_names()
@@ -41,7 +35,7 @@ number_of_collections = len(collections)
 
 # Get database stats
 db_stats = db.command("dbstats")
-total_size_mb = db_stats.get('dataSize', 0) / (1024 * 1024)  # Convert bytes to MB if available
+total_size_mb = db_stats['dataSize'] / (1024 * 1024)  # Convert bytes to MB
 
 # Create output data
 output_data = {
@@ -73,7 +67,7 @@ collection_info=$(cat "docdb_collection_info_$(date +%Y%m%d).json")
 instance_details_json=$(cat <<EOF
 {
   "InstanceDetails": $instances,
-  "CollectionInfo": $collection_info
+  $collection_info
 }
 EOF
 )
