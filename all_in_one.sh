@@ -22,6 +22,12 @@ username = "raisrujan"
 password = "4SF21CI047"
 username = urllib.parse.quote_plus(username)
 password = urllib.parse.quote_plus(password)
+ENDPOINT="demo2.cluster-c7yrno5pngaa.ap-south-1.docdb.amazonaws.com"
+PORT=27017
+USERNAME="raisrujan"
+PASSWORD="4SF21CI047"
+DB_NAME="demo2"
+CA_FILE_PATH="global-bundle.pem"
 
 # MongoDB client connection string
 client = pymongo.MongoClient(f"mongodb://raisrujan:8861203688@demo2.cluster-c7yrno5pngaa.ap-south-1.docdb.amazonaws.com:27017/?tls=true&tlsCAFile=global-bundle.pem&replicaSet=rs0&readPreference=secondaryPreferred&retryWrites=false")
