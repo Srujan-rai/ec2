@@ -35,8 +35,7 @@ number_of_collections = len(collections)
 
 # Get database stats
 db_stats = db.command("dbstats")
-total_size_mb = db_stats['dataSize'] / (1024 * 1024)  # Convert bytes to MB
-
+    total_size_mb = db_stats.get('dataSize', 0) / (1024 * 1024)  # Convert bytes to MB if available
 # Create output data
 output_data = {
     "number_of_collections": number_of_collections,
