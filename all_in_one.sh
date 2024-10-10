@@ -24,7 +24,7 @@ username = urllib.parse.quote_plus(username)
 password = urllib.parse.quote_plus(password)
 
 # MongoDB client connection string
-client = pymongo.MongoClient(f"mongodb://{username}:{password}@{ENDPOINT}:{PORT}/?tls=true&tlsCAFile={CA_FILE_PATH}&replicaSet=rs0&readPreference=secondaryPreferred&retryWrites=false")
+client = pymongo.MongoClient(f"mongodb://raisrujan:8861203688@demo2.cluster-c7yrno5pngaa.ap-south-1.docdb.amazonaws.com:27017/?tls=true&tlsCAFile=global-bundle.pem&replicaSet=rs0&readPreference=secondaryPreferred&retryWrites=false")
 
 # Connect to the database
 db = client.get_database(DB_NAME)
@@ -67,8 +67,7 @@ collection_info=$(cat "docdb_collection_info_$(date +%Y%m%d).json")
 instance_details_json=$(cat <<EOF
 {
   "InstanceDetails": $instances,
-  "number_of_collections": $(echo $collection_info | jq '.number_of_collections'),
-  "total_size_MB": $(echo $collection_info | jq '.total_size_MB')
+  "CollectionInfo": $collection_info
 }
 EOF
 )
@@ -83,27 +82,39 @@ import json
 import pandas as pd
 
 def format_json_to_excel(json_data, output_path):
-    instance_details = json_data.get("InstanceDetails", [])
+    instance_details = json_data.get("InstanceDetails", [{}])
     
-    # Create DataFrame for instance details
     instance_details_df = pd.DataFrame(instance_details)
+    
+    # Combine Count and Storage columns
+    instance_details_df['CountStorage'] = instance_details_df[['Count', 'Storage']].apply(lambda x: ', '.join(x.dropna().astype(str)), axis=1)
+    
+    # Drop unneeded columns
+    instance_details_df = instance_details_df.drop(columns=['Count', 'Storage'])
 
-    # Combine Count and Storage columns into a new column if needed
-    instance_details_df['CountStorage'] = instance_details_df[['Count', 'Storage']].astype(str).agg(', '.join, axis=1)
+    # Create structured data for final Excel output
+    structured_data = {
+        'InstanceDetails': ['Name', 'Type', 'CountStorage', '', ''],
+        'Details': [
+            instance_details_df['Name'][0],
+            instance_details_df['Type'][0],
+            instance_details_df['CountStorage'][0],
+            '',
+            ''
+        ],
+        'Collections': ['Collections', '', '', 'TotalCollectionSize', ''],
+        'Values': [
+            json_data.get("number_of_collections", "null"),
+            '',
+            '',
+            json_data.get("total_size_MB", "null"),
+            ''
+        ]
+    }
 
-    # Drop unneeded columns if they exist
-    instance_details_df = instance_details_df.drop(columns=['Count', 'Storage'], errors='ignore')
-
-    # Create a summary DataFrame for collections
-    collections_summary_df = pd.DataFrame({
-        'Metric': ['Number of Collections', 'Total Size (MB)'],
-        'Value': [json_data.get("number_of_collections", 0), json_data.get("total_size_MB", 0.0)]
-    })
-
-    # Write both DataFrames to an Excel file
-    with pd.ExcelWriter(output_path, engine='openpyxl') as writer:
-        instance_details_df.to_excel(writer, sheet_name="InstanceDetails", index=False)
-        collections_summary_df.to_excel(writer, sheet_name="CollectionsSummary", index=False)
+    # Create DataFrame and save as Excel
+    final_df = pd.DataFrame(structured_data)
+    final_df.to_excel(output_path, sheet_name="FormattedData", index=False)
 
 # Load the data from documentdb_details.json
 with open('documentdb_details.json', 'r') as f:
